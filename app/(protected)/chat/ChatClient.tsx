@@ -19,7 +19,6 @@ export default function ChatClient({
 }) {
   const supabase = useSupabase();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -124,11 +123,7 @@ export default function ChatClient({
   return (
     <div className="flex h-screen">
 
-      {/* 👉 SIDEBAR RESPONSIVE */}
-      <ConversationList
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+     
 
       {/* 👉 MAIN CHAT */}
       <div className="flex flex-col flex-1 bg-slate-50">
