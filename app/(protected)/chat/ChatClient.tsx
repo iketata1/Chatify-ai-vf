@@ -19,6 +19,7 @@ export default function ChatClient({
 }) {
   const supabase = useSupabase();
 
+  // 👉 État mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,12 +46,19 @@ export default function ChatClient({
       .order("created_at", { ascending: true });
 
     if (data) {
-      setMessages(data);
+      setMessages(
+        data.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }))
+      );
     }
   }
 
   async function sendMessage() {
     if (!input.trim() || !user || isSending) return;
+
+    setIsSending(true);
 
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -89,6 +97,7 @@ export default function ChatClient({
 
     setStreamingText("");
     setTokensPerSecond(null);
+    setIsSending(false);
 
     await supabase.from("messages").insert([
       {
@@ -114,15 +123,16 @@ export default function ChatClient({
   }
 
   return (
-    <div className="flex">
-      {/* SIDEBAR */}
+    <div className="flex h-screen">
+
+      {/* 👉 SIDEBAR RESPONSIVE */}
       <ConversationList
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* MAIN */}
-      <div className="flex flex-col h-screen w-full bg-slate-50">
+      {/* 👉 MAIN CHAT */}
+      <div className="flex flex-col flex-1 bg-slate-50">
         <header className="border-b bg-white">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div>
@@ -134,7 +144,7 @@ export default function ChatClient({
               </p>
             </div>
 
-            {/* BOUTON MOBILE MENU */}
+            {/* BOUTON MOBILE OUVERTURE */}
             <button
               className="md:hidden p-2 text-slate-900"
               onClick={() => setMobileMenuOpen(true)}
@@ -144,14 +154,20 @@ export default function ChatClient({
           </div>
         </header>
 
-        {/* ZONE DE CHAT (reste identique) */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 py-4">
             {messages.map((msg, i) => (
-              <div key={i} className={`mb-4 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={i}
+                className={`mb-4 flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
-                    msg.role === "user" ? "bg-blue-500 text-white" : "bg-white text-slate-900"
+                    msg.role === "user"
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-slate-900"
                   }`}
                 >
                   <div className="text-sm whitespace-pre-wrap">
@@ -173,6 +189,7 @@ export default function ChatClient({
           </div>
         </main>
 
+        {/* INPUT */}
         <div className="border-t bg-white">
           <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
             <input
@@ -180,9 +197,13 @@ export default function ChatClient({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
+              placeholder="Écris ton message..."
             />
-
-            <button onClick={sendMessage} className="px-5 py-2 bg-slate-900 text-white rounded-lg">
+            <button
+              onClick={sendMessage}
+              disabled={isSending}
+              className="px-5 py-2 bg-slate-900 text-white rounded-lg"
+            >
               Envoyer
             </button>
           </div>

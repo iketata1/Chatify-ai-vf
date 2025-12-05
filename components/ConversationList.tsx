@@ -66,7 +66,6 @@ export default function ConversationList({
     await fetch(`/api/conversations/${id}/delete`, {
       method: "DELETE",
     });
-
     await load();
   }
 
@@ -110,31 +109,29 @@ export default function ConversationList({
         </span>
       </div>
 
-      {/* NEW CONV */}
+      {/* NEW CONVERSATION */}
       <div className="px-3 pt-3 pb-2 border-b border-slate-900">
         <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase mb-2">
           Conversations
         </p>
         <Link
           href="/chat/new"
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          onClick={() => setMobileMenuOpen(false)}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium"
         >
           <PlusIcon className="h-4 w-4" />
           Nouvelle conversation
         </Link>
       </div>
 
-      {/* LIST */}
+      {/* LISTE */}
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
         {conversations.map((conv) => (
           <div
             key={conv.id}
-            className={`
-              flex items-center justify-between rounded-lg text-sm
-              ${
-                activeId === conv.id ? "bg-slate-800" : "hover:bg-slate-900/70"
-              }
-            `}
+            className={`flex items-center justify-between rounded-lg text-sm ${
+              activeId === conv.id ? "bg-slate-800" : "hover:bg-slate-900/70"
+            }`}
           >
             {editingId === conv.id ? (
               <div className="flex flex-1 gap-2 p-2">
