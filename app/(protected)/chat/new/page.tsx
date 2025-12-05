@@ -38,12 +38,27 @@ export default function NewChatPage() {
               Titre de la conversation
             </label>
             <input
-              id="title"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 placeholder-slate-400"
-              placeholder="Ex : Idées de recette healthy, préparation entretien Chatify..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+  id="title"
+  className="
+    w-full 
+    border border-slate-300 
+    rounded-lg 
+    px-3 
+    py-2 
+    text-sm 
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-emerald-500 
+    focus:border-emerald-500 
+    bg-slate-50 
+    placeholder:text-slate-600 
+    text-slate-800
+  "
+  placeholder="Ex : Idées de recette healthy, préparation entretien Chatify..."
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+/>
+
           </div>
 
           <div className="flex justify-end">
