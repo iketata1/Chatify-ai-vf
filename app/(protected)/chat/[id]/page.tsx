@@ -1,21 +1,27 @@
-// app/(protected)/chat/[id]/page.tsx
 import { redirect } from "next/navigation";
-import { getSupabaseServer } from "@/lib/supabase-server";
 import ChatClient from "../ChatClient";
+import { getSupabaseServer } from "@/lib/supabase-server";
 
-export default async function ChatConversationPage({
-  params,
-}: {
-  params: { id: string };
+export default async function ChatConversationPage(props: {
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await props.params;
 
   const supabase = await getSupabaseServer();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth");
+  if (error || !user) {
+    redirect("/auth");
+  }
 
-  return <ChatClient user={user} conversationId={id} />;
+  return (
+    <ChatClient
+      key={id}
+      user={user}
+      conversationId={id}
+    />
+  );
 }

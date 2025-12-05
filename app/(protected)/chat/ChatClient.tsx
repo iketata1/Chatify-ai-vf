@@ -34,10 +34,10 @@ export default function ChatClient({
 
   // 🔽 Charge l’historique dès qu’on a user + conversationId
   useEffect(() => {
-    if (!user?.id || !conversationId) return;
+    if (!conversationId) return;
     loadMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, conversationId]);
+  }, [conversationId]);
+  
 
   async function loadMessages() {
     console.log("🔄 loadMessages pour conversation:", conversationId);
@@ -60,12 +60,17 @@ export default function ChatClient({
       return;
     }
 
-    setMessages(
-      data.map((m: any) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content as string,
-      }))
-    );
+    try {
+      console.log(data)
+      setMessages(
+        data.map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content as string,
+        }))
+      );
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async function sendMessage() {
