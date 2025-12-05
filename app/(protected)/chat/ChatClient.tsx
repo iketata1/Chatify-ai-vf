@@ -1,4 +1,3 @@
-// app/(protected)/chat/ChatClient.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -27,18 +26,16 @@ export default function ChatClient({
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ scroll auto en bas
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
-  // ✅ charge l’historique quand l’utilisateur OU la conversation changent
   useEffect(() => {
-    if (!user || !conversationId) return;
-    loadMessages(user.id);
-  }, [user, conversationId]);
+    if (!conversationId) return;
+    loadMessages();
+  }, [conversationId, supabase]);
 
-  async function loadMessages(userId: string) {
+  async function loadMessages() {
     const { data, error } = await supabase
       .from("messages")
       .select("role, content, created_at")
@@ -80,11 +77,13 @@ export default function ChatClient({
       body: JSON.stringify({
         message: userMessage.content,
         userId: user.id,
+      
       }),
     });
 
     if (!res.body) {
       setIsSending(false);
+      console.error("Pas de body dans la réponse /api/chat");
       return;
     }
 
@@ -101,7 +100,9 @@ export default function ChatClient({
 
       const elapsed = (Date.now() - start) / 1000;
       const tokens = countTokens(fullResponse);
-      setTokensPerSecond((tokens / elapsed).toFixed(2));
+      if (elapsed > 0) {
+        setTokensPerSecond((tokens / elapsed).toFixed(2));
+      }
     }
 
     setMessages((prev) => [
@@ -113,8 +114,7 @@ export default function ChatClient({
     setTokensPerSecond(null);
     setIsSending(false);
 
-    // ✅ enregistre les deux messages
-    await supabase.from("messages").insert([
+    const { error: insertError } = await supabase.from("messages").insert([
       {
         conversation_id: conversationId,
         user_id: user.id,
@@ -129,18 +129,24 @@ export default function ChatClient({
       },
     ]);
 
-    // ✅ met à jour la date de la conversation
-    await supabase
+    if (insertError) {
+      console.error("Erreur insert messages:", insertError.message);
+    }
+
+    const { error: updateError } = await supabase
       .from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
 
-    // ✅ recharge proprement depuis la DB
-    await loadMessages(user.id);
+    if (updateError) {
+      console.error("Erreur update conversation:", updateError.message);
+    }
+
+    await loadMessages();
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
       {/* MESSAGES */}
       <div className="flex-1 overflow-y-auto bg-slate-50">
         <div className="max-w-3xl mx-auto px-4 py-4">
@@ -169,6 +175,11 @@ export default function ChatClient({
             <div className="mb-4 flex justify-start">
               <div className="max-w-[80%] rounded-2xl px-4 py-3 shadow-sm bg-white text-slate-900">
                 {streamingText}
+                {tokensPerSecond && (
+                  <div className="mt-2 text-[11px] text-slate-400">
+                    ~{tokensPerSecond} tokens/s
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -177,7 +188,7 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT (texte noir) */}
+      {/* INPUT */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
