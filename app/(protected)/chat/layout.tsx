@@ -3,8 +3,12 @@
 import { useState } from "react";
 import ConversationList from "@/components/ConversationList";
 
-export default function ChatLayout({ children }: { children: React.ReactNode }) {
-  // Toujours ouverte au début (même sur mobile)
+export default function ChatLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // 👉 Sidebar ouverte par défaut (desktop + mobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
@@ -15,9 +19,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* CONTENU (header + page) */}
+      {/* COLONNE DROITE : header + contenu */}
       <div className="flex flex-1 flex-col bg-slate-50">
-        {/* HEADER GLOBAL (hamburger ici) */}
+        {/* HEADER GLOBAL */}
         <header className="border-b bg-white">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div>
@@ -29,17 +33,17 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
 
-            {/* Bouton pour ouvrir/fermer la sidebar sur mobile */}
+            {/* BOUTON HAMBURGER (mobile seulement) */}
             <button
               className="md:hidden p-2 text-slate-900"
-              onClick={() => setMobileMenuOpen((open) => !open)}
+              onClick={() => setMobileMenuOpen(true)}
             >
               ☰
             </button>
           </div>
         </header>
 
-        {/* ICI on affiche /chat/new ou /chat/[id] */}
+        {/* CONTENU DES PAGES (ChatClient, NewConversation, etc.) */}
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>

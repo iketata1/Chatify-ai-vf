@@ -43,7 +43,7 @@ export default function ChatClient({
 
     if (data) {
       setMessages(
-        data.map((m: any) => ({
+        data.map((m) => ({
           role: m.role,
           content: m.content,
         }))
@@ -71,10 +71,7 @@ export default function ChatClient({
       }),
     });
 
-    if (!res.body) {
-      setIsSending(false);
-      return;
-    }
+    if (!res.body) return;
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -92,7 +89,10 @@ export default function ChatClient({
       setTokensPerSecond((currentTokens / elapsed).toFixed(2));
     }
 
-    setMessages((prev) => [...prev, { role: "assistant", content: fullResponse }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: fullResponse },
+    ]);
 
     setStreamingText("");
     setTokensPerSecond(null);
@@ -123,7 +123,7 @@ export default function ChatClient({
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
-      {/* messages */}
+      {/* ZONE MESSAGES */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-4">
           {messages.map((msg, i) => (
@@ -159,7 +159,7 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* input */}
+      {/* INPUT */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
