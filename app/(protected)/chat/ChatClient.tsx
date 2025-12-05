@@ -19,6 +19,7 @@ export default function ChatClient({
 }) {
   const supabase = useSupabase();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
