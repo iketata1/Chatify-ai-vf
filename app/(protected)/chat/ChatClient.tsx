@@ -1,3 +1,4 @@
+// app/(protected)/chat/ChatClient.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -30,9 +31,10 @@ export default function ChatClient({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
+  // 🔥 IMPORTANT : recharger quand conversationId change
   useEffect(() => {
     if (user) loadMessages(user.id);
-  }, [user, conversationId]); // 🔥 re-charge quand on change de conversation
+  }, [user, conversationId]);
 
   async function loadMessages(userId: string) {
     const { data } = await supabase
@@ -43,9 +45,9 @@ export default function ChatClient({
 
     if (data) {
       setMessages(
-        data.map((m: any) => ({
-          role: m.role as "user" | "assistant",
-          content: m.content as string,
+        data.map((m) => ({
+          role: m.role,
+          content: m.content,
         }))
       );
     }
@@ -92,7 +94,10 @@ export default function ChatClient({
       setTokensPerSecond((currentTokens / elapsed).toFixed(2));
     }
 
-    setMessages((prev) => [...prev, { role: "assistant", content: fullResponse }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: fullResponse },
+    ]);
 
     setStreamingText("");
     setTokensPerSecond(null);
@@ -122,10 +127,10 @@ export default function ChatClient({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex-1 flex flex-col">
       {/* ZONE MESSAGES */}
       <div className="flex-1 overflow-y-auto bg-slate-50">
-        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-4">
+        <div className="max-w-3xl mx-auto px-4 py-4">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -159,11 +164,13 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT EN BAS */}
+      {/* INPUT BAR */}
       <div className="border-t bg-white">
-        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-3 flex gap-2">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
-            className="flex-1 border p-2 rounded text-sm text-black placeholder:text-slate-400"
+            className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm
+                       text-slate-900 placeholder-slate-400
+                       focus:outline-none focus:ring-2 focus:ring-slate-900/40"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}

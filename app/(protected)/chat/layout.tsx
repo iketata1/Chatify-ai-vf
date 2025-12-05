@@ -8,22 +8,22 @@ export default function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Sidebar ouverte par défaut (desktop + mobile)
+  // 👉 sidebar ouverte par défaut (desktop & mobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
-    <div className="flex min-h-screen">
-      {/* SIDEBAR */}
+    <div className="flex h-screen bg-slate-50">
+      {/* SIDEBAR - toujours visible en desktop, slide en mobile */}
       <ConversationList
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* COLONNE PRINCIPALE */}
-      <div className="flex flex-1 flex-col bg-slate-50">
-        {/* HEADER GLOBAL AVEC HAMBURGER */}
+      {/* Côté droit : header + zone de chat */}
+      <div className="flex flex-1 flex-col">
+        {/* HEADER COMMUN */}
         <header className="border-b bg-white">
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between px-4 py-3 md:px-6 lg:px-8">
             <div>
               <p className="text-sm font-semibold text-slate-900">
                 Chatify AI Assistant
@@ -33,18 +33,18 @@ export default function ChatLayout({
               </p>
             </div>
 
-            {/* Bouton hamburger visible seulement sur mobile */}
+            {/* BOUTON HAMBURGER (mobile seulement) */}
             <button
-              className="md:hidden p-2 text-slate-900"
-              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden rounded-md border border-slate-200 px-2 py-1 text-slate-900"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
             >
               ☰
             </button>
           </div>
         </header>
 
-        {/* CONTENU DES PAGES /chat */}
-        <main className="flex-1 flex flex-col">
+        {/* CONTENU (ChatClient ou /chat/new) */}
+        <main className="flex-1 flex flex-col overflow-hidden">
           {children}
         </main>
       </div>
