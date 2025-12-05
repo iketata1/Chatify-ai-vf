@@ -14,5 +14,13 @@ export default async function ChatConversationPage(props: {
 
   if (!user) redirect("/auth");
 
-  return <ChatClient user={user} conversationId={id} />;
+  return (
+    <ChatClient
+      user={user}
+      conversationId={id}
+      mobileMenuOpen={false}
+      setMobileMenuOpen={() => {}}
+    />
+  );
+  
 }
