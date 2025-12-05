@@ -70,8 +70,8 @@ export default function ConversationList() {
   }
 
   return (
-    <div className="w-72 bg-slate-950 text-slate-100 border-r border-slate-900 flex flex-col h-full">
-  
+      <div className="hidden md:flex w-72 bg-slate-950 text-slate-100 border-r border-slate-900 flex-col h-full">
+          
       <div className="px-3 pt-5 pb-3 border-b border-slate-900 flex items-center gap-2">
         <Image
           src="/logo-chatify.png"

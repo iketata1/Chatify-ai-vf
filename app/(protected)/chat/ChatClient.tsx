@@ -132,28 +132,42 @@ export default function ChatClient({
 
   return (
     <div className="flex flex-col h-screen bg-slate-50">
-      <header className="border-b bg-white">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">
-            Chatify AI Assistant
-            </p>
-            <p className="text-xs text-slate-500">
-              Pose une question, l’assistant te répond en temps réel.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            {tokensPerSecond && (
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 font-medium">
-                ⏱ {tokensPerSecond} tokens/s
-              </span>
-            )}
-            <span className="hidden sm:inline-flex items-center rounded-full border px-3 py-1">
-              Connecté
-            </span>
-          </div>
-        </div>
-      </header>
+<header className="border-b bg-white">
+  <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    
+    {/* TITLE + DESCRIPTION */}
+    <div>
+      <p className="text-sm font-semibold text-slate-900">
+        Chatify AI Assistant
+      </p>
+      <p className="text-xs text-slate-500">
+        Pose une question, l’assistant te répond en temps réel.
+      </p>
+    </div>
+
+    {/* 🟢 BOUTON MOBILE MENU */}
+    <button 
+      className="md:hidden p-2 text-slate-900"
+      onClick={() => alert('Menu mobile (à connecter plus tard)')}
+    >
+      ☰
+    </button>
+
+    {/* TOKENS + CONNECTÉ */}
+    <div className="flex items-center gap-2 text-xs text-slate-500">
+      {tokensPerSecond && (
+        <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 font-medium">
+          ⏱ {tokensPerSecond} tokens/s
+        </span>
+      )}
+      <span className="hidden sm:inline-flex items-center rounded-full border px-3 py-1">
+        Connecté
+      </span>
+    </div>
+
+  </div>
+</header>
+
 
       {/* ZONE DE CHAT */}
       <main className="flex-1 overflow-y-auto">
