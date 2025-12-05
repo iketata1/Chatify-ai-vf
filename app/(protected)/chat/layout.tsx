@@ -8,22 +8,24 @@ export default function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // 👉 Sidebar ouverte par défaut (desktop + mobile)
+  // Sidebar ouverte par défaut (même sur mobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    // ❌ plus de h-screen + overflow-hidden
+    // ✅ min-h-screen pour laisser le mobile respirer
+    <div className="flex min-h-screen">
       {/* SIDEBAR */}
       <ConversationList
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* COLONNE DROITE : header + contenu */}
+      {/* COLONNE PRINCIPALE */}
       <div className="flex flex-1 flex-col bg-slate-50">
         {/* HEADER GLOBAL */}
         <header className="border-b bg-white">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
             <div>
               <p className="text-sm font-semibold text-slate-900">
                 Chatify AI Assistant
@@ -33,7 +35,7 @@ export default function ChatLayout({
               </p>
             </div>
 
-            {/* BOUTON HAMBURGER (mobile seulement) */}
+            {/* Bouton hamburger pour MOBILE */}
             <button
               className="md:hidden p-2 text-slate-900"
               onClick={() => setMobileMenuOpen(true)}
@@ -43,8 +45,9 @@ export default function ChatLayout({
           </div>
         </header>
 
-        {/* CONTENU DES PAGES (ChatClient, NewConversation, etc.) */}
-        <main className="flex-1 overflow-y-auto">
+        {/* CONTENU DES PAGES /chat */}
+        {/* ❌ plus de overflow-y-auto ici */}
+        <main className="flex-1 flex flex-col">
           {children}
         </main>
       </div>

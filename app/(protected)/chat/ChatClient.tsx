@@ -43,9 +43,9 @@ export default function ChatClient({
 
     if (data) {
       setMessages(
-        data.map((m) => ({
-          role: m.role,
-          content: m.content,
+        data.map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content as string,
         }))
       );
     }
@@ -71,7 +71,10 @@ export default function ChatClient({
       }),
     });
 
-    if (!res.body) return;
+    if (!res.body) {
+      setIsSending(false);
+      return;
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -89,11 +92,7 @@ export default function ChatClient({
       setTokensPerSecond((currentTokens / elapsed).toFixed(2));
     }
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: fullResponse },
-    ]);
-
+    setMessages((prev) => [...prev, { role: "assistant", content: fullResponse }]);
     setStreamingText("");
     setTokensPerSecond(null);
     setIsSending(false);
@@ -122,10 +121,11 @@ export default function ChatClient({
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
-      {/* ZONE MESSAGES */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+    // ⚠️ pas de h-screen ici, juste flex-col + flex-1 pour la zone scrollable
+    <div className="flex flex-1 flex-col">
+      {/* ZONE MESSAGES (la seule qui scrolle) */}
+      <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-4">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -159,11 +159,11 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT */}
+      {/* INPUT FIXÉ EN BAS DU CHAT */}
       <div className="border-t bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
+        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-3 flex gap-2">
           <input
-            className="flex-1 border p-2 rounded"
+            className="flex-1 border p-2 rounded text-sm"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
@@ -172,7 +172,7 @@ export default function ChatClient({
           <button
             onClick={sendMessage}
             disabled={isSending}
-            className="px-5 py-2 bg-slate-900 text-white rounded-lg"
+            className="px-5 py-2 bg-slate-900 text-white rounded-lg text-sm disabled:opacity-60"
           >
             Envoyer
           </button>
