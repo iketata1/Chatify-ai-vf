@@ -8,20 +8,18 @@ export default function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // 👉 sidebar ouverte par défaut (desktop & mobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      {/* SIDEBAR - toujours visible en desktop, slide en mobile */}
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      {/* Sidebar */}
       <ConversationList
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* Côté droit : header + zone de chat */}
+      {/* Zone droite */}
       <div className="flex flex-1 flex-col">
-        {/* HEADER COMMUN */}
         <header className="border-b bg-white">
           <div className="flex items-center justify-between px-4 py-3 md:px-6 lg:px-8">
             <div>
@@ -33,7 +31,7 @@ export default function ChatLayout({
               </p>
             </div>
 
-            {/* BOUTON HAMBURGER (mobile seulement) */}
+            {/* Bouton hamburger mobile */}
             <button
               className="md:hidden rounded-md border border-slate-200 px-2 py-1 text-slate-900"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
@@ -43,7 +41,6 @@ export default function ChatLayout({
           </div>
         </header>
 
-        {/* CONTENU (ChatClient ou /chat/new) */}
         <main className="flex-1 flex flex-col overflow-hidden">
           {children}
         </main>

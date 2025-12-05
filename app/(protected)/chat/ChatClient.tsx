@@ -27,17 +27,18 @@ export default function ChatClient({
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ scroll auto en bas
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
-  // 👉 Charge l’historique à chaque changement de conversation
+  // ✅ charge l’historique quand l’utilisateur OU la conversation changent
   useEffect(() => {
-    if (!conversationId) return;
-    loadMessages();
-  }, [conversationId, supabase]);
+    if (!user || !conversationId) return;
+    loadMessages(user.id);
+  }, [user, conversationId]);
 
-  async function loadMessages() {
+  async function loadMessages(userId: string) {
     const { data, error } = await supabase
       .from("messages")
       .select("role, content, created_at")
@@ -49,14 +50,17 @@ export default function ChatClient({
       return;
     }
 
-    if (data) {
-      setMessages(
-        data.map((m: any) => ({
-          role: m.role,
-          content: m.content,
-        }))
-      );
+    if (!data) {
+      setMessages([]);
+      return;
     }
+
+    setMessages(
+      data.map((m: any) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content as string,
+      }))
+    );
   }
 
   async function sendMessage() {
@@ -96,8 +100,8 @@ export default function ChatClient({
       setStreamingText(fullResponse);
 
       const elapsed = (Date.now() - start) / 1000;
-      const currentTokens = countTokens(fullResponse);
-      setTokensPerSecond((currentTokens / elapsed).toFixed(2));
+      const tokens = countTokens(fullResponse);
+      setTokensPerSecond((tokens / elapsed).toFixed(2));
     }
 
     setMessages((prev) => [
@@ -109,7 +113,7 @@ export default function ChatClient({
     setTokensPerSecond(null);
     setIsSending(false);
 
-    // 👉 Sauvegarde dans Supabase avec le bon conversation_id
+    // ✅ enregistre les deux messages
     await supabase.from("messages").insert([
       {
         conversation_id: conversationId,
@@ -125,12 +129,14 @@ export default function ChatClient({
       },
     ]);
 
+    // ✅ met à jour la date de la conversation
     await supabase
       .from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
 
-    await loadMessages();
+    // ✅ recharge proprement depuis la DB
+    await loadMessages(user.id);
   }
 
   return (
@@ -171,7 +177,7 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT BAR (texte noir) */}
+      {/* INPUT (texte noir) */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
