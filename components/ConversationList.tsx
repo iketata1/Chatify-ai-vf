@@ -57,6 +57,7 @@ export default function ConversationList({
       method: "PATCH",
       body: JSON.stringify({ title: editingTitle }),
     });
+
     setEditingId(null);
     await load();
   }
@@ -82,10 +83,11 @@ export default function ConversationList({
         transform transition-transform duration-300
 
         ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+
         md:translate-x-0 md:relative md:flex
       `}
     >
-      {/* HEADER MOBILE : bouton ✖ pour fermer */}
+      {/* HEADER MOBILE (bouton fermer) */}
       <div className="md:hidden flex justify-end p-2 border-b border-slate-800">
         <button
           onClick={() => setMobileMenuOpen(false)}
@@ -97,25 +99,18 @@ export default function ConversationList({
 
       {/* LOGO */}
       <div className="px-3 pt-5 pb-3 border-b border-slate-900 flex items-center gap-2">
-        <Image
-          src="/logo-chatify.png"
-          alt="Chatify AI Logo"
-          width={26}
-          height={26}
-          className="rounded-md"
-        />
-        <span className="text-sm font-semibold text-slate-100 tracking-wide">
-          Chatify AI
-        </span>
+        <Image src="/logo-chatify.png" width={26} height={26} alt="Chatify" />
+        <span className="text-sm font-semibold">Chatify AI</span>
       </div>
 
-      {/* NOUVELLE CONVERSATION */}
+      {/* NEW CONVERSATION */}
       <div className="px-3 pt-3 pb-2 border-b border-slate-900">
         <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase mb-2">
           Conversations
         </p>
         <Link
           href="/chat/new"
+          onClick={() => setMobileMenuOpen(false)} // ferme sur mobile
           className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium"
         >
           <PlusIcon className="h-4 w-4" />
@@ -147,9 +142,11 @@ export default function ConversationList({
                 <Link
                   href={`/chat/${conv.id}`}
                   className="p-2 flex-1 truncate text-xs text-slate-100"
+                  onClick={() => setMobileMenuOpen(false)} // ferme sur mobile
                 >
                   {conv.title || "Sans titre"}
                 </Link>
+
                 <button
                   onClick={() => {
                     setEditingId(conv.id);
@@ -159,6 +156,7 @@ export default function ConversationList({
                 >
                   <PencilSquareIcon className="h-4 w-4" />
                 </button>
+
                 <button
                   onClick={() => deleteConversation(conv.id)}
                   className="p-1 text-slate-400 hover:text-red-500"

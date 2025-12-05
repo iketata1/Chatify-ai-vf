@@ -32,7 +32,7 @@ export default function ChatClient({
 
   useEffect(() => {
     if (user) loadMessages(user.id);
-  }, [user]);
+  }, [user, conversationId]); // 🔥 re-charge quand on change de conversation
 
   async function loadMessages(userId: string) {
     const { data } = await supabase
@@ -93,6 +93,7 @@ export default function ChatClient({
     }
 
     setMessages((prev) => [...prev, { role: "assistant", content: fullResponse }]);
+
     setStreamingText("");
     setTokensPerSecond(null);
     setIsSending(false);
@@ -121,9 +122,8 @@ export default function ChatClient({
   }
 
   return (
-    // ⚠️ pas de h-screen ici, juste flex-col + flex-1 pour la zone scrollable
     <div className="flex flex-1 flex-col">
-      {/* ZONE MESSAGES (la seule qui scrolle) */}
+      {/* ZONE MESSAGES */}
       <div className="flex-1 overflow-y-auto bg-slate-50">
         <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-4">
           {messages.map((msg, i) => (
@@ -159,11 +159,11 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT FIXÉ EN BAS DU CHAT */}
+      {/* INPUT EN BAS */}
       <div className="border-t bg-white">
         <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-3 flex gap-2">
           <input
-            className="flex-1 border p-2 rounded text-sm"
+            className="flex-1 border p-2 rounded text-sm text-black placeholder:text-slate-400"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}

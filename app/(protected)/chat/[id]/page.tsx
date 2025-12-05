@@ -14,7 +14,9 @@ export default async function ChatConversationPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth");
+  if (!user) {
+    redirect("/auth");
+  }
 
   return <ChatClient user={user} conversationId={id} />;
 }

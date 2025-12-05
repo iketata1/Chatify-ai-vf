@@ -8,12 +8,10 @@ export default function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Sidebar ouverte par défaut (même sur mobile)
+  // Sidebar ouverte par défaut (desktop + mobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
-    // ❌ plus de h-screen + overflow-hidden
-    // ✅ min-h-screen pour laisser le mobile respirer
     <div className="flex min-h-screen">
       {/* SIDEBAR */}
       <ConversationList
@@ -23,7 +21,7 @@ export default function ChatLayout({
 
       {/* COLONNE PRINCIPALE */}
       <div className="flex flex-1 flex-col bg-slate-50">
-        {/* HEADER GLOBAL */}
+        {/* HEADER GLOBAL AVEC HAMBURGER */}
         <header className="border-b bg-white">
           <div className="flex items-center justify-between px-4 py-3 sm:px-6">
             <div>
@@ -35,7 +33,7 @@ export default function ChatLayout({
               </p>
             </div>
 
-            {/* Bouton hamburger pour MOBILE */}
+            {/* Bouton hamburger visible seulement sur mobile */}
             <button
               className="md:hidden p-2 text-slate-900"
               onClick={() => setMobileMenuOpen(true)}
@@ -46,7 +44,6 @@ export default function ChatLayout({
         </header>
 
         {/* CONTENU DES PAGES /chat */}
-        {/* ❌ plus de overflow-y-auto ici */}
         <main className="flex-1 flex flex-col">
           {children}
         </main>
