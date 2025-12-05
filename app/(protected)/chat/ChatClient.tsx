@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import { countTokens } from "@/lib/utils/tokens";
-import ConversationList from "@/components/ConversationList";
 
 type Message = {
   role: "user" | "assistant";
@@ -13,13 +12,15 @@ type Message = {
 export default function ChatClient({
   user,
   conversationId,
+  mobileMenuOpen,
+  setMobileMenuOpen,
 }: {
   user: any;
   conversationId: string;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (val: boolean) => void;
 }) {
   const supabase = useSupabase();
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -124,84 +125,81 @@ export default function ChatClient({
   return (
     <div className="flex h-screen">
 
-     
+      {/* HEADER + BURGER */}
+      <header className="border-b bg-white w-full">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">
+              Chatify AI Assistant
+            </p>
+            <p className="text-xs text-slate-500">
+              Pose une question, l’assistant te répond en temps réel.
+            </p>
+          </div>
 
-      {/* 👉 MAIN CHAT */}
-      <div className="flex flex-col flex-1 bg-slate-50">
-      <header className="border-b bg-white">
-  <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div>
-      <p className="text-sm font-semibold text-slate-900">
-        Chatify AI Assistant
-      </p>
-      <p className="text-xs text-slate-500">
-        Pose une question, l’assistant te répond en temps réel.
-      </p>
-    </div>
+          {/* BOUTON MOBILE */}
+          <button
+            className="md:hidden p-2 text-slate-900"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            ☰
+          </button>
+        </div>
+      </header>
 
-    {/* BOUTON MOBILE */}
-    <button
-      className="md:hidden p-2 text-slate-900"
-      onClick={() => setMobileMenuOpen(true)}
-    >
-      ☰
-    </button>
-  </div>
-</header>
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            {messages.map((msg, i) => (
+      {/* CHAT MESSAGES */}
+      <main className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`mb-4 flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
               <div
-                key={i}
-                className={`mb-4 flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
+                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
+                  msg.role === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-slate-900"
                 }`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
-                    msg.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-slate-900"
-                  }`}
-                >
-                  <div className="text-sm whitespace-pre-wrap">
-                    {msg.content}
-                  </div>
+                <div className="text-sm whitespace-pre-wrap">
+                  {msg.content}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
 
-            {streamingText && (
-              <div className="mb-4 flex justify-start">
-                <div className="max-w-[80%] rounded-2xl px-4 py-3 shadow-sm bg-white text-slate-900">
-                  {streamingText}
-                </div>
+          {streamingText && (
+            <div className="mb-4 flex justify-start">
+              <div className="max-w-[80%] rounded-2xl px-4 py-3 shadow-sm bg-white text-slate-900">
+                {streamingText}
               </div>
-            )}
+            </div>
+          )}
 
-            <div ref={bottomRef} />
-          </div>
-        </main>
+          <div ref={bottomRef} />
+        </div>
+      </main>
 
-        {/* INPUT */}
-        <div className="border-t bg-white">
-          <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
-            <input
-              className="flex-1 border p-2 rounded"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
-              placeholder="Écris ton message..."
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isSending}
-              className="px-5 py-2 bg-slate-900 text-white rounded-lg"
-            >
-              Envoyer
-            </button>
-          </div>
+      {/* INPUT */}
+      <div className="border-t bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
+          <input
+            className="flex-1 border p-2 rounded"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
+            placeholder="Écris ton message..."
+          />
+          <button
+            onClick={sendMessage}
+            disabled={isSending}
+            className="px-5 py-2 bg-slate-900 text-white rounded-lg"
+          >
+            Envoyer
+          </button>
         </div>
       </div>
     </div>

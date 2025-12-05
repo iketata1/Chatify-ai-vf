@@ -66,6 +66,7 @@ export default function ConversationList({
     await fetch(`/api/conversations/${id}/delete`, {
       method: "DELETE",
     });
+
     await load();
   }
 
@@ -82,9 +83,10 @@ export default function ConversationList({
         flex flex-col h-full
         transform transition-transform duration-300
         ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
-        md:relative md:translate-x-0 md:flex
+        md:translate-x-0 md:relative md:flex
       `}
     >
+
       {/* HEADER MOBILE */}
       <div className="md:hidden flex justify-end p-2 border-b border-slate-800">
         <button
@@ -147,11 +149,12 @@ export default function ConversationList({
               <>
                 <Link
                   href={`/chat/${conv.id}`}
-                  onClick={() => setMobileMenuOpen(false)}
                   className="p-2 flex-1 truncate text-xs text-slate-100"
+                  onClick={() => setMobileMenuOpen(false)}   // <-- IMPORTANT
                 >
                   {conv.title || "Sans titre"}
                 </Link>
+
                 <button
                   onClick={() => {
                     setEditingId(conv.id);
@@ -161,6 +164,7 @@ export default function ConversationList({
                 >
                   <PencilSquareIcon className="h-4 w-4" />
                 </button>
+
                 <button
                   onClick={() => deleteConversation(conv.id)}
                   className="p-1 text-slate-400 hover:text-red-500"
