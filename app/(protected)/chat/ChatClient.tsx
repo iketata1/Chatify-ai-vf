@@ -128,26 +128,26 @@ export default function ChatClient({
 
       {/* 👉 MAIN CHAT */}
       <div className="flex flex-col flex-1 bg-slate-50">
-        <header className="border-b bg-white">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">
-                Chatify AI Assistant
-              </p>
-              <p className="text-xs text-slate-500">
-                Pose une question, l’assistant te répond en temps réel.
-              </p>
-            </div>
+      <header className="border-b bg-white">
+  <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div>
+      <p className="text-sm font-semibold text-slate-900">
+        Chatify AI Assistant
+      </p>
+      <p className="text-xs text-slate-500">
+        Pose une question, l’assistant te répond en temps réel.
+      </p>
+    </div>
 
-            {/* BOUTON MOBILE OUVERTURE */}
-            <button
-              className="md:hidden p-2 text-slate-900"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              ☰
-            </button>
-          </div>
-        </header>
+    {/* BOUTON MOBILE */}
+    <button
+      className="md:hidden p-2 text-slate-900"
+      onClick={() => setMobileMenuOpen(true)}
+    >
+      ☰
+    </button>
+  </div>
+</header>
 
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 py-4">
