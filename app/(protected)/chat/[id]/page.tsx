@@ -2,10 +2,12 @@ import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase-server";
 import ChatClient from "../ChatClient";
 
-export default async function ChatConversationPage(props: {
-  params: Promise<{ id: string }>;
+export default async function ChatConversationPage({
+  params,
+}: {
+  params: { id: string };
 }) {
-  const { id } = await props.params;
+  const { id } = params;
 
   const supabase = await getSupabaseServer();
   const {
@@ -14,13 +16,5 @@ export default async function ChatConversationPage(props: {
 
   if (!user) redirect("/auth");
 
-  return (
-    <ChatClient
-      user={user}
-      conversationId={id}
-      mobileMenuOpen={false}
-      setMobileMenuOpen={() => {}}
-    />
-  );
-  
+  return <ChatClient user={user} conversationId={id} />;
 }

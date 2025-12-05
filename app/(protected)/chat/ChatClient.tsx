@@ -12,13 +12,9 @@ type Message = {
 export default function ChatClient({
   user,
   conversationId,
-  mobileMenuOpen,
-  setMobileMenuOpen,
 }: {
   user: any;
   conversationId: string;
-  mobileMenuOpen: boolean;
-  setMobileMenuOpen: (val: boolean) => void;
 }) {
   const supabase = useSupabase();
 
@@ -47,7 +43,7 @@ export default function ChatClient({
 
     if (data) {
       setMessages(
-        data.map((m) => ({
+        data.map((m: any) => ({
           role: m.role,
           content: m.content,
         }))
@@ -75,7 +71,10 @@ export default function ChatClient({
       }),
     });
 
-    if (!res.body) return;
+    if (!res.body) {
+      setIsSending(false);
+      return;
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -123,32 +122,9 @@ export default function ChatClient({
   }
 
   return (
-    <div className="flex h-screen">
-
-      {/* HEADER + BURGER */}
-      <header className="border-b bg-white w-full">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">
-              Chatify AI Assistant
-            </p>
-            <p className="text-xs text-slate-500">
-              Pose une question, l’assistant te répond en temps réel.
-            </p>
-          </div>
-
-          {/* BOUTON MOBILE */}
-          <button
-            className="md:hidden p-2 text-slate-900"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            ☰
-          </button>
-        </div>
-      </header>
-
-      {/* CHAT MESSAGES */}
-      <main className="flex-1 overflow-y-auto bg-slate-50">
+    <div className="flex flex-col h-full bg-slate-50">
+      {/* messages */}
+      <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-4">
           {messages.map((msg, i) => (
             <div
@@ -181,9 +157,9 @@ export default function ChatClient({
 
           <div ref={bottomRef} />
         </div>
-      </main>
+      </div>
 
-      {/* INPUT */}
+      {/* input */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input

@@ -7,8 +7,6 @@ import { usePathname } from "next/navigation";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
 import {
   PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
   ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -30,8 +28,6 @@ export default function ConversationList({
   const activeId = pathname?.split("/").pop();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
 
   async function load() {
     const {
@@ -52,6 +48,11 @@ export default function ConversationList({
     load();
   }, []);
 
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = "/auth";
+  }
+
   return (
     <div
       className={`
@@ -60,14 +61,12 @@ export default function ConversationList({
         flex flex-col h-full
         transform transition-transform duration-300
 
-        /* 🔥 TOUJOURS VISIBLE */
         ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
 
-        /* 🔥 Desktop toujours visible */
         md:translate-x-0 md:relative md:flex
       `}
     >
-      {/* HEADER MOBILE (fermer) */}
+      {/* HEADER MOBILE (bouton fermer) */}
       <div className="md:hidden flex justify-end p-2 border-b border-slate-800">
         <button
           onClick={() => setMobileMenuOpen(false)}
@@ -79,12 +78,21 @@ export default function ConversationList({
 
       {/* LOGO */}
       <div className="px-3 pt-5 pb-3 border-b border-slate-900 flex items-center gap-2">
-        <Image src="/logo-chatify.png" width={26} height={26} alt="" />
+        <Image
+          src="/logo-chatify.png"
+          width={26}
+          height={26}
+          alt="Chatify AI"
+          className="rounded-md"
+        />
         <span className="text-sm font-semibold">Chatify AI</span>
       </div>
 
-      {/* NEW CHAT */}
+      {/* NOUVELLE CONV */}
       <div className="px-3 pt-3 pb-2 border-b border-slate-900">
+        <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase mb-2">
+          Conversations
+        </p>
         <Link
           href="/chat/new"
           className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium"
@@ -94,7 +102,7 @@ export default function ConversationList({
         </Link>
       </div>
 
-      {/* LIST */}
+      {/* LISTE */}
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
         {conversations.map((conv) => (
           <Link
@@ -112,12 +120,10 @@ export default function ConversationList({
       {/* LOGOUT */}
       <div className="border-t border-slate-900 px-3 py-3">
         <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            window.location.href = "/auth";
-          }}
-          className="text-xs text-slate-400 hover:text-red-400"
+          onClick={logout}
+          className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-400"
         >
+          <ArrowLeftOnRectangleIcon className="h-4 w-4" />
           Se déconnecter
         </button>
       </div>
