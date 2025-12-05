@@ -39,7 +39,7 @@ export default function NewChatPage() {
             </label>
             <input
               id="title"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 placeholder-slate-400"
               placeholder="Ex : Idées de recette healthy, préparation entretien Chatify..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
