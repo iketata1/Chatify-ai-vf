@@ -224,14 +224,29 @@ export default function ChatClient({
 
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
-          <input
-            className="flex-1 border border-slate-300 p-3 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50"
-            placeholder="Écris ton message..."
-            value={input}
-            disabled={isSending}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
-          />
+        <input
+  className="
+    flex-1
+    border border-slate-300
+    p-3
+    rounded-lg
+    shadow-sm
+    text-sm
+    focus:outline-none
+    focus:ring-2
+    focus:ring-emerald-500
+    focus:border-emerald-500
+    bg-slate-50
+    placeholder:text-slate-600
+    text-slate-800
+  "
+  placeholder="Écris ton message..."
+  value={input}
+  disabled={isSending}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => (e.key === 'Enter' ? sendMessage() : null)}
+/>
+
 
           <button
             onClick={sendMessage}
