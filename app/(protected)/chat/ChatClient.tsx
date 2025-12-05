@@ -31,21 +31,27 @@ export default function ChatClient({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
-  // 🔥 IMPORTANT : recharger quand conversationId change
+  // 👉 Charge l’historique à chaque changement de conversation
   useEffect(() => {
-    if (user) loadMessages(user.id);
-  }, [user, conversationId]);
+    if (!conversationId) return;
+    loadMessages();
+  }, [conversationId, supabase]);
 
-  async function loadMessages(userId: string) {
-    const { data } = await supabase
+  async function loadMessages() {
+    const { data, error } = await supabase
       .from("messages")
-      .select("*")
+      .select("role, content, created_at")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
 
+    if (error) {
+      console.error("Erreur loadMessages:", error.message);
+      return;
+    }
+
     if (data) {
       setMessages(
-        data.map((m) => ({
+        data.map((m: any) => ({
           role: m.role,
           content: m.content,
         }))
@@ -103,6 +109,7 @@ export default function ChatClient({
     setTokensPerSecond(null);
     setIsSending(false);
 
+    // 👉 Sauvegarde dans Supabase avec le bon conversation_id
     await supabase.from("messages").insert([
       {
         conversation_id: conversationId,
@@ -123,12 +130,12 @@ export default function ChatClient({
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
 
-    await loadMessages(user.id);
+    await loadMessages();
   }
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* ZONE MESSAGES */}
+      {/* MESSAGES */}
       <div className="flex-1 overflow-y-auto bg-slate-50">
         <div className="max-w-3xl mx-auto px-4 py-4">
           {messages.map((msg, i) => (
@@ -164,7 +171,7 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT BAR */}
+      {/* INPUT BAR (texte noir) */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
