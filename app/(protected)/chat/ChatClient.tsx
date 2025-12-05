@@ -1,3 +1,4 @@
+// app/(protected)/chat/ChatClient.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -26,16 +27,21 @@ export default function ChatClient({
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  // 🔽 Scroll automatique
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
+  // 🔽 Charge l’historique dès qu’on a user + conversationId
   useEffect(() => {
-    if (!conversationId) return;
+    if (!user?.id || !conversationId) return;
     loadMessages();
-  }, [conversationId, supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, conversationId]);
 
   async function loadMessages() {
+    console.log("🔄 loadMessages pour conversation:", conversationId);
+
     const { data, error } = await supabase
       .from("messages")
       .select("role, content, created_at")
@@ -43,11 +49,13 @@ export default function ChatClient({
       .order("created_at", { ascending: true });
 
     if (error) {
-      console.error("Erreur loadMessages:", error.message);
+      console.error("❌ Erreur loadMessages:", error.message);
       return;
     }
 
-    if (!data) {
+    console.log("✅ Messages trouvés:", data);
+
+    if (!data || data.length === 0) {
       setMessages([]);
       return;
     }
@@ -66,6 +74,8 @@ export default function ChatClient({
     setIsSending(true);
 
     const userMessage: Message = { role: "user", content: input };
+
+    // ➜ on ajoute à l’UI
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
@@ -77,13 +87,13 @@ export default function ChatClient({
       body: JSON.stringify({
         message: userMessage.content,
         userId: user.id,
-      
+        conversationId, // 👈 on envoie aussi l’id au backend si tu veux t’en servir plus tard
       }),
     });
 
     if (!res.body) {
+      console.error("❌ Pas de body dans la réponse /api/chat");
       setIsSending(false);
-      console.error("Pas de body dans la réponse /api/chat");
       return;
     }
 
@@ -105,6 +115,7 @@ export default function ChatClient({
       }
     }
 
+    // ➜ on ajoute la réponse dans l’UI
     setMessages((prev) => [
       ...prev,
       { role: "assistant", content: fullResponse },
@@ -114,6 +125,7 @@ export default function ChatClient({
     setTokensPerSecond(null);
     setIsSending(false);
 
+    // 🔽 Enregistre dans la DB
     const { error: insertError } = await supabase.from("messages").insert([
       {
         conversation_id: conversationId,
@@ -130,18 +142,23 @@ export default function ChatClient({
     ]);
 
     if (insertError) {
-      console.error("Erreur insert messages:", insertError.message);
+      console.error("❌ Erreur insert messages:", insertError.message);
+      // Si tu vois ici "row-level security", "RLS", etc. => c’est une policy Supabase à corriger
+    } else {
+      console.log("✅ Messages enregistrés en DB");
     }
 
+    // 🔽 Met à jour la conversation pour le tri
     const { error: updateError } = await supabase
       .from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
 
     if (updateError) {
-      console.error("Erreur update conversation:", updateError.message);
+      console.error("❌ Erreur update conversation:", updateError.message);
     }
 
+    // 🔽 Recharge proprement depuis la DB
     await loadMessages();
   }
 
@@ -188,7 +205,7 @@ export default function ChatClient({
         </div>
       </div>
 
-      {/* INPUT */}
+      {/* INPUT (mobile friendly) */}
       <div className="border-t bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex gap-2">
           <input
