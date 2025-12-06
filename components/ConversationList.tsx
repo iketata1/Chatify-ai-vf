@@ -1,8 +1,7 @@
-// components/ConversationList.tsx
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSupabase } from "@/app/providers/SupabaseProvider";
@@ -34,7 +33,7 @@ export default function ConversationList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -47,11 +46,14 @@ export default function ConversationList({
       .order("updated_at", { ascending: false });
 
     if (data) setConversations(data as Conversation[]);
-  }
+  }, [supabase]);
 
   useEffect(() => {
-    load();
-  }, []);
+    const fetchConversations = async () => {
+      await load();
+    };
+    void fetchConversations();
+  }, [pathname, load]);
 
   async function renameConversation(id: string) {
     await fetch(`/api/conversations/${id}/rename`, {
@@ -84,8 +86,10 @@ export default function ConversationList({
         ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:relative md:flex
       `}
+      id="conversation-sidebar"
+      role="navigation"
+      aria-label="Conversations"
     >
-      {/* HEADER MOBILE (fermer) */}
       <div className="md:hidden flex justify-end p-2 border-b border-slate-800">
         <button
           onClick={() => setMobileMenuOpen(false)}
@@ -95,7 +99,6 @@ export default function ConversationList({
         </button>
       </div>
 
-      {/* LOGO */}
       <div className="px-3 pt-5 pb-3 border-b border-slate-900 flex items-center gap-2">
         <Image
           src="/logo-chatify.png"
@@ -109,7 +112,6 @@ export default function ConversationList({
         </span>
       </div>
 
-      {/* NEW CONVERSATION */}
       <div className="px-3 pt-3 pb-2 border-b border-slate-900">
         <p className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase mb-2">
           Conversations
@@ -124,62 +126,70 @@ export default function ConversationList({
         </Link>
       </div>
 
-      {/* LISTE DES CONVERSATIONS */}
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
-        {conversations.map((conv) => (
-          <div
-            key={conv.id}
-            className={`flex items-center justify-between rounded-lg text-sm ${
-              activeId === conv.id ? "bg-slate-800" : "hover:bg-slate-900/70"
-            }`}
-          >
-            {editingId === conv.id ? (
-              <div className="flex flex-1 gap-2 p-2">
-                <input
-                  className="border border-slate-600 bg-slate-900 text-slate-100 text-xs p-1 rounded flex-1"
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                />
-                <button onClick={() => renameConversation(conv.id)}>✔</button>
-                <button onClick={() => setEditingId(null)}>✖</button>
-              </div>
-            ) : (
-              <>
-                <Link
-                  href={`/chat/${conv.id}`}
-                  className="p-2 flex-1 truncate text-xs text-slate-100"
-                  onClick={() => setMobileMenuOpen(false)} // ferme sur mobile
-                >
-                  {conv.title || "Sans titre"}
-                </Link>
-                <button
-                  onClick={() => {
-                    setEditingId(conv.id);
-                    setEditingTitle(conv.title);
-                  }}
-                  className="p-1 text-slate-400 hover:text-emerald-400"
-                >
-                  <PencilSquareIcon className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => deleteConversation(conv.id)}
-                  className="p-1 text-slate-400 hover:text-red-500"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </>
-            )}
+        {conversations.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-xs text-slate-500 text-center">Aucune conversation</p>
           </div>
-        ))}
+        ) : (
+          conversations.map((conv) => (
+            <div
+              key={conv.id}
+              className={`flex items-center justify-between rounded-lg text-sm ${
+                activeId === conv.id ? "bg-slate-800" : "hover:bg-slate-900/70"
+              }`}
+            >
+              {editingId === conv.id ? (
+                <div className="flex flex-1 gap-2 p-2">
+          <input
+            className="border border-slate-600 bg-slate-900 text-slate-100 text-xs p-2 rounded flex-1 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-500"
+            value={editingTitle}
+            onChange={(e) => setEditingTitle(e.target.value)}
+            aria-label="Edit conversation title"
+          />
+                  <button onClick={() => renameConversation(conv.id)}>✔</button>
+                  <button onClick={() => setEditingId(null)}>✖</button>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href={`/chat/${conv.id}`}
+                    className="p-2 flex-1 truncate text-xs text-slate-100"
+                    onClick={() => setMobileMenuOpen(false)} 
+                  >
+                    {conv.title || "Sans titre"}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setEditingId(conv.id);
+                      setEditingTitle(conv.title);
+                    }}
+                    className="p-2 text-slate-400 hover:text-emerald-400 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                    aria-label={`Edit title of conversation ${conv.title}`}
+                  >
+                    <PencilSquareIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => deleteConversation(conv.id)}
+                    className="p-2 text-slate-400 hover:text-red-500 rounded transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                    aria-label={`Delete conversation ${conv.title}`}
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
-      {/* LOGOUT */}
       <div className="border-t border-slate-900 px-3 py-3">
         <button
           onClick={logout}
-          className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-400"
+          className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-400 rounded px-2 py-2 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+          aria-label="Sign out and return to login page"
         >
-          <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+          <ArrowLeftOnRectangleIcon className="h-5 w-5" />
           Se déconnecter
         </button>
       </div>

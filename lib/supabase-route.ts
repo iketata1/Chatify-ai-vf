@@ -1,4 +1,3 @@
-// lib/supabase-route.ts
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
@@ -13,11 +12,11 @@ export async function getSupabaseRoute() {
         get(name: string) {
           return cookieStore.get(name)?.value ?? "";
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set(name, value, options);
+        set(name: string, value: string, options?: Record<string, unknown>) {
+          cookieStore.set(name, value, options as Record<string, unknown>);
         },
-        remove(name: string, options: any) {
-          cookieStore.set(name, "", { ...options, maxAge: 0 });
+        remove(name: string, options?: Record<string, unknown>) {
+          cookieStore.set(name, "", { ...(options ?? {}), maxAge: 0 });
         }
       }
     }

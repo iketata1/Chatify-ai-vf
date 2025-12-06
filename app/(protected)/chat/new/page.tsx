@@ -71,7 +71,6 @@ export default function NewChatPage() {
                   : "bg-emerald-600 hover:bg-emerald-500"
               }`}
             >
-              <span>🚀</span>
               <span>Créer et ouvrir</span>
             </button>
           </div>

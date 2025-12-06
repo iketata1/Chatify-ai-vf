@@ -1,165 +1,98 @@
-# Chatify AI Assistant – Chatbot Case Study
+# Chatify AI Assistant — Étude de cas Chatbot
 
-This project was built as part of the Chatify recruitment case study.
+Ce projet a été développé pour une étude de cas de recrutement. Il s'agit d'une application full-stack de chatbot IA construite avec Next.js (App Router), React et TypeScript, utilisant Supabase pour l'authentification et le stockage, et la plateforme Gemini pour la génération de texte.
 
-It is a full-stack AI chatbot application with:
+## Fonctionnalités
 
-- **Next.js (App Router) + React + TypeScript**
-- **Supabase** for authentication and PostgreSQL storage
-- **Gemini** (Google Generative Language API) as the LLM
-- **Tailwind CSS** for a clean, modern UI
+- **Authentification utilisateur** (Supabase : email / mot de passe)
+- **Interface de chat** connectée à Gemini (`gemini-2.0-flash`)
+- **Conversations persistantes** (tables `conversations` et `messages`)
+- **Liste de conversations** : créer, renommer, supprimer, reprendre
+- **Streaming** des réponses LLM via `ReadableStream`
+- **Estimation (UX) des tokens/s** pendant le streaming (méthode heuristique)
+- **Interface responsive** réalisée avec Tailwind CSS
 
-The goal is to provide a **simple but production-like** chatbot experience:
-authenticated users can create conversations, talk to an LLM in streaming, and
-retrieve their chat history.
+## Pile technologique
 
----
+- Framework : Next.js (App Router)
+- Langage : TypeScript
+- UI : React + Tailwind CSS
+- Auth & DB : Supabase (PostgreSQL + Auth)
+- LLM : Gemini API (`gemini-2.0-flash`)
+- Librairies UI : `@supabase/auth-ui-react`, `@supabase/auth-ui-shared`
 
-## ✨ Features
+## Vue d'ensemble de l'architecture
 
-- 🔐 **User authentication** with Supabase (email/password)
-- 💬 **Chat interface** connected to Gemini (`gemini-2.0-flash`)
-- 🧠 **Persistent conversations** stored in Supabase (`conversations` + `messages`)
-- 📜 **Conversation list** (create, rename, delete, resume a chat)
-- ⚡ **Streaming responses** from the LLM using `ReadableStream`
-- 📊 **Estimated tokens per second** displayed during streaming (bonus)
-- 💻 **Responsive & clean UI** using Tailwind (dark sidebar, light chat area)
+### Routage (fichiers clés)
 
----
+- `app/layout.tsx` : enveloppe l'application avec `SupabaseProvider` (client navigateur)
+- `app/page.tsx` : vérifie côté serveur la session Supabase ; si session présente redirige vers `/chat/new`, sinon rend `AuthRedirectClient` (client-side) qui redirige vers `/chat/new` ou `/auth`
+- `app/(auth)/auth/page.tsx` : page publique avec le composant Supabase Auth
+- `app/(protected)/chat/layout.tsx` : layout des routes protégées (sidebar + zone de chat)
+- `app/(protected)/chat/new/page.tsx` : création d'une nouvelle conversation
+- `app/(protected)/chat/[id]/page.tsx` : composeur serveur qui charge l'utilisateur et rend `ChatClient`
 
-## 🧱 Tech Stack
+### Intégration Supabase
 
-- **Framework**: Next.js (App Router)
-- **Language**: TypeScript
-- **UI**: React + Tailwind CSS
-- **Auth & DB**: Supabase (PostgreSQL + Auth)
-- **LLM**: Gemini API (`gemini-2.0-flash`)
-- **Styling helpers**: `@supabase/auth-ui-react`, `@supabase/auth-ui-shared`
+Trois helpers :
 
----
+- `lib/supabase-browser.ts` — client navigateur via `createBrowserClient`
+- `lib/supabase-server.ts` — client serveur via `createServerClient` (cookies)
+- `lib/supabase-route.ts` — client pour les Route Handlers (`/api/...`) conservant le contexte d'auth
 
-## 🧩 Architecture Overview
+Le `SupabaseProvider` (dans `app/providers/SupabaseProvider.tsx`) expose le client au reste de l'app.
 
-### Routing
+## Modèle de données (résumé)
 
-The app uses the **App Router** structure:
-
-- `app/layout.tsx`  
-  Wraps the whole app with `SupabaseProvider` (browser client).
-
-- `app/page.tsx`  
-  Redirects `/` → `/auth`.
-
-- `app/(auth)/auth/page.tsx`  
-  Public route.  
-  Supabase Auth UI component to sign up / sign in.  
-  On `SIGNED_IN` event, the user is redirected to `/chat/new`.
-
-- `app/(protected)/chat/layout.tsx`  
-  Layout for all chat routes.  
-  Renders the **conversation sidebar** on the left and the selected chat page on the right.
-
-- `app/(protected)/chat/page.tsx`  
-  Redirects `/chat` → `/chat/new` (or could redirect to last conversation).
-
-- `app/(protected)/chat/new/page.tsx`  
-  Page to **create a new conversation** (title input + button).  
-  After creation, redirects to `/chat/[id]`.
-
-- `app/(protected)/chat/[id]/page.tsx`  
-  Server component that:
-  - Loads the current user via `getSupabaseServer()`
-  - If no user → redirects to `/auth`
-  - Otherwise renders `<ChatClient user={user} conversationId={id} />`
-
-### Supabase integration
-
-There are three helpers for Supabase:
-
-- `lib/supabase-browser.ts`  
-  Creates a browser Supabase client via `createBrowserClient`.
-
-- `lib/supabase-server.ts`  
-  Creates a server-side Supabase client with `createServerClient` + cookies, used in server components.
-
-- `lib/supabase-route.ts`  
-  Same as above, but for **route handlers** (`/api/...`), to keep auth context on API calls.
-
-`SupabaseProvider` (in `app/providers/SupabaseProvider.tsx`) creates a React context that exposes a browser Supabase client to all client components.
-
-### Data model
-
-Two main tables are used in Supabase:
-
-#### `conversations`
+### `conversations`
 
 - `id` (UUID)
-- `user_id` (UUID) – the owner of the conversation
-- `title` (text)
+- `user_id` (UUID)
+- `title` (texte)
 - `updated_at` (timestamp)
 
-Used to list a user’s conversations in the sidebar and sort them by recent activity.
-
-#### `messages`
+### `messages`
 
 - `id` (UUID)
-- `conversation_id` (UUID) – foreign key to `conversations`
+- `conversation_id` (UUID)
 - `user_id` (UUID)
-- `role` (`'user' | 'assistant'`)
-- `content` (text)
+- `role` (`user` | `assistant`)
+- `content` (texte)
 - `created_at` (timestamp)
 
-Used to reconstruct a full chat history when opening a conversation.
+## Routes API (exemples)
 
-### API routes
+### `POST /api/chat`
 
-- `app/api/chat/route.ts`  
-  - `POST`  
-  - Body: `{ message: string, userId: string }`  
-  - Calls the Gemini API (`gemini-2.0-flash:generateContent`) with the user’s message.  
-  - Returns plain text and is consumed as a **stream** on the client.
+Corps : `{ message: string, userId: string }` — appelle la génération Gemini et renvoie le texte en streaming.
 
-- `app/api/conversations/route.ts`  
-  - `POST`  
-  - Reads the authenticated user from Supabase on the server.  
-  - Inserts a new row in `conversations` with `user_id`, `title`.  
-  - Returns `{ id }` of the created conversation.
+### `POST /api/conversations`
 
-- `app/api/conversations/[id]/rename/route.ts`  
-  - `PATCH`  
-  - Updates the `title` of the conversation (with user check).
+Crée une conversation liée à l'utilisateur authentifié et retourne `{ id }`.
 
-- `app/api/conversations/[id]/delete/route.ts`  
-  - `DELETE`  
-  - Deletes a conversation by `id` (and any cascading data if configured).
+### `PATCH /api/conversations/[id]/rename`
 
----
+Met à jour le titre (vérifie le propriétaire).
 
-## 🧠 Chat & Streaming
+### `DELETE /api/conversations/[id]/delete`
 
-### Client-side chat logic (`ChatClient.tsx`)
+Supprime la conversation (et ses messages si cascade configurée).
 
-- Loads historical messages for a conversation from Supabase on mount.
-- When the user sends a message:
-  1. Append the user message to the local state.
-  2. Call `POST /api/chat` with the message & user id.
-  3. Read the response as a **stream** using `res.body.getReader()`.
-  4. Update a local `streamingText` state as chunks arrive.
-  5. Compute an **estimated tokens/s** value during streaming.
-  6. Once streaming ends, append the assistant message to the conversation.
-  7. Save both the user and assistant messages to the `messages` table.
-  8. Update `conversations.updated_at` for sorting in the sidebar.
+## Logique du chat & streaming
 
----
+Le composant client `ChatClient.tsx` :
 
-## 📊 Tokens per second (bonus) & its limitations
+1. Charge l'historique des messages depuis Supabase lors du montage.
+2. Lorsqu'un utilisateur envoie un message :
+	- ajoute immédiatement le message côté client (optimistic UI),
+	- appelle `POST /api/chat`, lit la réponse via `res.body.getReader()` et met à jour `streamingText` au fur et à mesure,
+	- calcule une estimation heuristique des tokens/s pour l'affichage UX,
+	- à la fin du streaming, ajoute le message assistant final, sauvegarde les messages en base et met à jour `conversations.updated_at`.
 
-During streaming, the UI displays an **estimated number of tokens per second**:
+Remarque : la réconciliation des IDs optimistes est effectuée en place (les IDs temporaires sont remplacés par les IDs renvoyés par Supabase), évitant un rechargement complet et des lectures supplémentaires en base.
 
-- A helper `countTokens(text)` approximates the number of tokens from the generated text.
-- In `ChatClient`, at each chunk, it computes:
+## Estimation des tokens (bonus) et limites
 
-```ts
-const elapsed = (Date.now() - start) / 1000;
-const currentTokens = countTokens(fullResponse);
-setTokensPerSecond((currentTokens / elapsed).toFixed(2));
+- `countTokens()` est une estimation basée sur les espaces (heuristique) pour affichage UX. Ce n'est pas une tokenisation exacte et n'est pas adaptée pour la facturation. Pour des mesures précises, utilisez le tokenizer du fournisseur ou les rapports d'usage serveur.
+- Le point de terminaison chat utilise l'Edge runtime et implémente un timeout via `AbortController` pour garder le streaming réactif.
+- Le `viewport` est exporté via `export const viewport` dans `app/layout.tsx` (exigence App Router).

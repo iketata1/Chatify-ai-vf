@@ -4,7 +4,6 @@ import { getSupabaseRoute } from "@/lib/supabase-route";
 export async function POST(req: Request) {
     const supabase = await getSupabaseRoute();
 
-  // 1️ Récupérer l'user connecté
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
@@ -13,7 +12,6 @@ export async function POST(req: Request) {
 
   const { title } = await req.json();
 
-  //  Insérer la conversation
   const { data, error } = await supabase
     .from("conversations")
     .insert({
@@ -27,6 +25,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  //  Retourner l'ID
   return NextResponse.json({ id: data.id }, { status: 200 });
 }
