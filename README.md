@@ -96,3 +96,6 @@ Remarque : la réconciliation des IDs optimistes est effectuée en place (les ID
 - `countTokens()` est une estimation basée sur les espaces (heuristique) pour affichage UX. Ce n'est pas une tokenisation exacte et n'est pas adaptée pour la facturation. Pour des mesures précises, utilisez le tokenizer du fournisseur ou les rapports d'usage serveur.
 - Le point de terminaison chat utilise l'Edge runtime et implémente un timeout via `AbortController` pour garder le streaming réactif.
 - Le `viewport` est exporté via `export const viewport` dans `app/layout.tsx` (exigence App Router).
+=======
+# Chatify-ai-vf
+Full-stack AI chatbot built with Next.js, Supabase, and Google Gemini. User authentication, persistent conversations, and real-time streaming responses.
